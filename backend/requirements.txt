@@ -18,3 +18,9 @@ django_redis==5.2.0
 openpyxl==3.0.10
 psutil==5.9.1
 daphne==4.0.0
+# es7.17.6有ik分词版本支持
+elasticsearch==7.17.6
+# dsl7版本支持所有es7系列
+elasticsearch-dsl==7.4.1
+# 很好用的环境变量控制工具
+python-dotenv==1.0.0

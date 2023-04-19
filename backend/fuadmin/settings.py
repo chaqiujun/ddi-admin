@@ -188,8 +188,8 @@ CELERY_RESULT_BACKEND = 'django-db'  # celery结果存储到数据库中
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'  # Backend数据库
 
 # token 有效时间 时 分 秒
-TOKEN_LIFETIME = 12 * 60 * 60
-# TOKEN_LIFETIME = 50
+# TOKEN_LIFETIME = 12 * 60 * 60 
+TOKEN_LIFETIME = 10 * 365 * 24 * 60 * 60 
 
 # 接口白名单，不需要授权直接访问
 WHITE_LIST = ['/api/system/userinfo', '/api/system/permCode', '/api/system/menu/route/tree']
