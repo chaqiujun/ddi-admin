@@ -74,6 +74,9 @@ python3 manage.py makemigrations system
 python3 manage.py migrate
 
 # # 初始化数据，不要轻易执行，会清空数据
+# 执行迁移命令：
+# python3 manage.py makemigrations system
+# python3 manage.py migrate
 # python3 manage.py init
 # # 初始化省市县数据:
 # python3 manage.py init_area
