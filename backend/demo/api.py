@@ -124,14 +124,6 @@ def date_range(range_id):
     start_date = today - timedelta(days=range_id)
     end_date = today
     return {'start_date':start_date, 'end_date':end_date}
-# Headerheader={
-#   "Authorization": "Bearer eyJ0eXBlIjogIkpXVCIsICJhbGciOiAiSFMyNTYifQ.eyJleHAiOiAxNjgxODYzMjEyLCAibGFzdF9sb2dpbiI6IG51bGwsICJpc19zdXBlcnVzZXIiOiB0cnVlLCAiaXNfc3RhZmYiOiB0cnVlLCAiaXNfYWN0aXZlIjogdHJ1ZSwgImRhdGVfam9pbmVkIjogIjIwMjMtMDQtMTggMTc6NTM6NTAiLCAiaWQiOiAxLCAicmVtYXJrIjogbnVsbCwgImNyZWF0b3IiOiBudWxsLCAibW9kaWZpZXIiOiBudWxsLCAiYmVsb25nX2RlcHQiOiBudWxsLCAic29ydCI6IDEsICJ1c2VybmFtZSI6ICJzdXBlcmFkbWluIiwgImVtYWlsIjogIiIsICJtb2JpbGUiOiBudWxsLCAibmFtZSI6ICJcdThkODVcdTdlYTdcdTdiYTFcdTc0MDZcdTU0NTgiLCAic3RhdHVzIjogdHJ1ZSwgImdlbmRlciI6IDEsICJ1c2VyX3R5cGUiOiAwLCAiZGVwdCI6IG51bGwsICJmaXJzdF9uYW1lIjogIiIsICJsYXN0X25hbWUiOiAiIiwgImdyb3VwcyI6IFtdLCAidXNlcl9wZXJtaXNzaW9ucyI6IFtdLCAicG9zdCI6IFtdLCAicm9sZSI6IFtdfQ.cglX7qWqbBVXiAxfjMLFP1MC1UVpDapfGBzrKmt-23g",
-#   "Content-Type": " Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
-# }
-# hea11der={
-#   "Authorization": "bearer eyJ0eXBlIjogIkpXVCIsICJhbGciOiAiSFMyNTYifQ.eyJle",
-#   "Content-Type": " Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
-# }
 
 
 @router.post("/xuanti_list_count/{range_id}")
@@ -267,3 +259,73 @@ def get_data_trend(request, range_id:int):
     for month, count in month_counts.items():
         month_counts_list.append((month, count))
     return {"data_trend": month_counts_list}
+
+from django.contrib import auth
+from django.forms import model_to_dict
+from django.shortcuts import get_object_or_404
+from ninja import Router, ModelSchema, Query, Schema, Field
+
+from fuadmin.settings import SECRET_KEY, TOKEN_LIFETIME
+from system.models import Users, Role, MenuButton, MenuColumnField
+from utils.fu_jwt import FuJwt
+from utils.fu_response import FuResponse
+from utils.request_util import save_login_log
+from utils.usual import get_user_info_from_token
+
+
+
+# ================登录相关接口=================
+class SchemaOut(ModelSchema):
+
+    class Config:
+        model = Users
+        model_exclude = ['password', 'role', 'post']
+
+
+class LoginSchema(Schema):
+    username: str = Field(None, alias="username")
+    password: str = Field(None, alias="password")
+
+
+class Out(Schema):
+    multi_depart: str
+    sysAllDictItems: str
+    departs: str
+    userInfo: SchemaOut
+    token: str
+
+@router.post("/login", response=Out, auth=None)
+def login(request, data: LoginSchema):
+    user_obj = auth.authenticate(request, **data.dict())
+    if user_obj:
+        request.user = user_obj
+        role = user_obj.role.all().values('id')
+        post = list(user_obj.post.all().values('id'))
+        role_list = []
+        post_list = []
+        for item in role:
+            role_list.append(item['id'])
+        for item in post:
+            post_list.append(item['id'])
+        user_obj_dic = model_to_dict(user_obj)
+        user_obj_dic['post'] = post_list
+        user_obj_dic['role'] = role_list
+        del user_obj_dic['password']
+        del user_obj_dic['avatar']
+
+        time_now = int(datetime.now().timestamp())
+        jwt = FuJwt(SECRET_KEY, user_obj_dic, valid_to=time_now + TOKEN_LIFETIME)
+        # 将生成的token加入缓存
+        # cache.set(user_obj.id, jwt.encode())
+        token = f"bearer {jwt.encode()}"
+        data = {
+            "multi_depart": 1,
+            "sysAllDictItems": "q",
+            "departs": "e",
+            'userInfo': user_obj_dic,
+            'token': token
+        }
+        save_login_log(request=request)
+        return data
+    else:
+        return FuResponse(code=500, msg="账号/密码错误")

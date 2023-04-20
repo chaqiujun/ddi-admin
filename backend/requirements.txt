@@ -24,3 +24,5 @@ elasticsearch==7.17.6
 elasticsearch-dsl==7.4.1
 # 很好用的环境变量控制工具
 python-dotenv==1.0.0
+# 跨域设置
+django-cors-headers

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django_celery_results',
     'system',
     'demo',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -52,6 +53,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'utils.middleware.ApiLoggingMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 
 ]
 
@@ -192,13 +195,16 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'  # Bac
 TOKEN_LIFETIME = 10 * 365 * 24 * 60 * 60 
 
 # 接口白名单，不需要授权直接访问
-WHITE_LIST = ['/api/system/userinfo', '/api/system/permCode', '/api/system/menu/route/tree']
+WHITE_LIST = ['/api/demo/login','/api/system/userinfo', '/api/system/permCode', '/api/system/menu/route/tree']
 
 # 接口日志记录
 API_LOG_ENABLE = True
-API_LOG_METHODS = ['POST', 'GET', 'DELETE', 'PUT']
+API_LOG_METHODS = ['POST', 'GET', 'DELETE', 'PUT','OPTIONS']
+# API_LOG_METHODS = []
 API_MODEL_MAP = {}
 
 
 # 初始化需要执行的列表，用来初始化后执行
 INITIALIZE_RESET_LIST = []
+#允许所有接口跨域！
+CORS_ORIGIN_ALLOW_ALL = True

@@ -78,7 +78,6 @@ def login(request, data: LoginSchema):
     else:
         return FuResponse(code=500, msg="账号/密码错误")
 
-
 @router.get("/logout", auth=None)
 def get_post(request):
     # 删除缓存
