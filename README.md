@@ -70,8 +70,6 @@ pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
     sudo apt-get install libmysqlclient-dev
     sudo apt-get install gcc python3-dev
 # 执行迁移命令：
-python3 manage.py makemigrations system
-python3 manage.py migrate
 
 # # 初始化数据，不要轻易执行，会清空数据
 # 执行迁移命令：
